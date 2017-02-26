@@ -3,10 +3,13 @@
  * Carl Denton and Olivia Chung
  */
 
+#ifndef _GRAPHDEF
+#define _GRAPHDEF 1
 #define RAND_WEIGHT 0
 #define RAND_COORD2 1
 #define RAND_COORD3 2
 #define RAND_COORD4 3
+#include "graph.h"
 
 /* vertex struct */
 struct vertex {
@@ -31,6 +34,7 @@ struct vertex {
 
 /* edge struct */
 struct edge {
+    int type;
     struct edge *next_edge;
     struct vertex *source;
     struct vertex *dest;
@@ -43,11 +47,13 @@ struct graph {
     long n;
 
     /* point to our edge list */
-    struct edge *head;
+    struct edge *edge_head;
+    struct vertex *vert_head;
 };
 
 /* generate a graph */
 struct graph *generate(int type, long n);
+struct edge *testedges(int num);
 
 /* find the weight of the minimum spanning tree on a graph */
 float mst_weight(struct graph *g);
@@ -56,5 +62,8 @@ float mst_weight(struct graph *g);
 void set_union(struct vertex *v1, struct vertex *v2);
 void set_find(struct vertex *v);
 
-/* sorting subroutine for kruskal's algorithm */
-struct edge *sort_by_weight(struct edge *head);
+/* utilities */
+struct edge *sort_by_weight(struct edge *head, int num);
+double get_weight(struct edge *e);
+
+#endif
