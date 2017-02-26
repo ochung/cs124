@@ -22,9 +22,9 @@ int main(void) {
     struct graph *g = generate(RAND_WEIGHT, num);
     printf("successfully generated graph\n");
     print_edges(g->edge_head);
-    //g->edge_head = sort_by_weight(g->edge_head, g->n_vert);
-    //printf("SORTED \n");
-    //print_edges(g->edge_head);
+    g->edge_head = sort_by_weight(g->edge_head, g->n_edges);
+    printf("SORTED \n");
+    print_edges(g->edge_head);
     
     return 0;
 }

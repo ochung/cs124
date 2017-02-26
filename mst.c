@@ -71,7 +71,6 @@ static struct edge *merge_lists(struct edge *e1, struct edge *e2) {
 /* return the weight on an edge */
 double get_weight(struct edge *e) {
     int type = e->type;
-    printf("type of this edge is %d\n", e->type);
     switch(type) {
         case RAND_WEIGHT:
             return e->weight;        

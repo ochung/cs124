@@ -45,6 +45,7 @@ struct edge {
 struct graph {
     /* number of nodes in this graph */
     long n_vert;
+    long n_edges;
 
     /* point to our edge list */
     struct vertex *vert_head;

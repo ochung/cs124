@@ -86,7 +86,7 @@ struct graph *generate(int type, long n) {
     }
    
     /* allocate space for the graph struct */
-    struct graph *new_graph = malloc(sizeof(new_graph));
+    struct graph *new_graph = malloc(sizeof(struct graph));
 
     /* failed allocation, clean up */
     if (!new_graph) {
@@ -97,6 +97,7 @@ struct graph *generate(int type, long n) {
 
     /* set fields */
     new_graph->n_vert = n;
+    new_graph->n_edges = n*(n-1)/2;
     new_graph->vert_head = vert_head;
     new_graph->edge_head = edge_head;
     
