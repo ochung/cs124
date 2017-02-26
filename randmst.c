@@ -2,7 +2,8 @@
 #include "graph.h"
 
 // num == -1 means print all
-void print_edges(struct edge* head, int type) {
+void print_edges(struct edge* head) {
+    printf("in print_edges\n");
     struct edge *cur = head;
 
     double weight = 0;
@@ -17,15 +18,13 @@ void print_edges(struct edge* head, int type) {
 }
 
 int main(void) {
-    int num = 10000;
-    struct edge *head = testedges(num);
-    printf("UNSORTED \n");
-    //print_edges(head, RAND_WEIGHT);
-
-    head = sort_by_weight(head, num);
-
-    printf("SORTED \n");
-    //print_edges(head, RAND_WEIGHT);
+    int num = 4;
+    struct graph *g = generate(RAND_WEIGHT, num);
+    printf("successfully generated graph\n");
+    print_edges(g->edge_head);
+    //g->edge_head = sort_by_weight(g->edge_head, g->n_vert);
+    //printf("SORTED \n");
+    //print_edges(g->edge_head);
     
     return 0;
 }

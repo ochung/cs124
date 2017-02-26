@@ -44,11 +44,11 @@ struct edge {
 /* graph struct */
 struct graph {
     /* number of nodes in this graph */
-    long n;
+    long n_vert;
 
     /* point to our edge list */
-    struct edge *edge_head;
     struct vertex *vert_head;
+    struct edge *edge_head;
 };
 
 /* generate a graph */
@@ -65,5 +65,6 @@ void set_find(struct vertex *v);
 /* utilities */
 struct edge *sort_by_weight(struct edge *head, int num);
 double get_weight(struct edge *e);
+void print_edges(struct edge* head);
 
 #endif
