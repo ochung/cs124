@@ -9,7 +9,6 @@
 #define RAND_COORD2 1
 #define RAND_COORD3 2
 #define RAND_COORD4 3
-#include "graph.h"
 
 /* vertex struct */
 struct vertex {
@@ -17,10 +16,14 @@ struct vertex {
     int type; 
 
     /* 
+     * set pointer is
      * NULL if we are the root 
      * otherwise points to some other node
+     *
+     * set rank is only meaningful at root
      */
     struct vertex *set;
+    int set_rank;
 
     /* linked list for storage */
     struct vertex *next_vert;
@@ -41,6 +44,11 @@ struct edge {
     double weight;
 };
 
+struct tree_edge {
+    struct edge *edge;    
+    struct tree_edge *next_edge;
+};
+
 /* graph struct */
 struct graph {
     /* number of nodes in this graph */
@@ -54,10 +62,11 @@ struct graph {
 
 /* generate a graph */
 struct graph *generate(int type, long n);
+void free_graph(struct graph *g);
 struct edge *testedges(int num);
 
 /* find the weight of the minimum spanning tree on a graph */
-float mst_weight(struct graph *g);
+double mst_weight(struct graph *g);
 
 /* set operations for kruskal's algorithm */
 void set_union(struct vertex *v1, struct vertex *v2);

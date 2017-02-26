@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <time.h>
+#include <sys/time.h>
 #include <math.h>
 #include "graph.h"
 
@@ -9,18 +10,21 @@ static struct vertex *init_vert(int type, struct vertex *next_v);
 static struct edge *init_edge(struct vertex *source, struct vertex *dest);
 static void free_vertex_list(struct vertex *head);
 static void free_edge_list(struct edge *head);
+void free_graph(struct graph *g);
 
 /* generate a random graph of a given type with n nodes */
-struct graph *generate(int type, long n) {
+struct graph *generate(int type, long n_vert) {
     /* seed the random number generator */
-    srand(time(NULL));
+    struct timeval tval;
+    gettimeofday(&tval, NULL);
+    srand((unsigned int) tval.tv_usec);
    
-    /* create linked list of n vertices */
+    /* create linked list of n_vert vertices */
     struct vertex *vert_head, *cur_vertex; 
     vert_head = cur_vertex = NULL; 
     
     /* make n vertices */
-    for (long i = 0; i < n; i++) {
+    for (long i = 0; i < n_vert; i++) {
         /* initialize a vertex */
         struct vertex *v = init_vert(type, NULL);
         
@@ -96,8 +100,8 @@ struct graph *generate(int type, long n) {
     }
 
     /* set fields */
-    new_graph->n_vert = n;
-    new_graph->n_edges = n*(n-1)/2;
+    new_graph->n_vert = n_vert;
+    new_graph->n_edges = n_vert*(n_vert-1)/2;
     new_graph->vert_head = vert_head;
     new_graph->edge_head = edge_head;
     
@@ -214,6 +218,13 @@ static void free_edge_list(struct edge *head) {
         cur_edge = next_edge;
     }
 }
+
+void free_graph(struct graph *graph) {
+    free_vertex_list(graph->vert_head);
+    free_edge_list(graph->edge_head);
+    free(graph);
+}
+
 
 /* initialize a bunch of edges (only for testing) */
 struct edge *testedges(int num) {
