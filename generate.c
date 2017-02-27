@@ -7,13 +7,14 @@
 #include "graph.h"
 
 static struct vertex *init_vert(int type, struct vertex *next_v);
-static struct edge *init_edge(struct vertex *source, struct vertex *dest);
+static struct edge *init_edge(double weight, struct vertex *source, struct vertex *dest);
+static double new_weight(int type, struct vertex *source, struct vertex *dest);
 static void free_vertex_list(struct vertex *head);
 static void free_edge_list(struct edge *head);
 void free_graph(struct graph *g);
 
 /* generate a random graph of a given type with n nodes */
-struct graph *generate(int type, long n_vert) {
+struct graph *generate(int type, long n_vert, int prune) {
     /* seed the random number generator */
     struct timeval tval;
     gettimeofday(&tval, NULL);
@@ -55,14 +56,23 @@ struct graph *generate(int type, long n_vert) {
     struct edge *edge_head, *cur_edge; 
     edge_head = cur_edge = NULL;
     
+    long n_edges = 0;
+    double weight;
     /* iterate over source nodes */
     while (vert_source->next_vert != NULL) {
         /* start right after the source vertex */
         vert_dest = vert_source->next_vert;
         while (vert_dest != NULL){
-            
             /* create an edge from the source to the destination */
-            struct edge *new_edge = init_edge(vert_source, vert_dest);
+            weight = new_weight(type, vert_source, vert_dest);
+            
+            if (prune && prune_weight(type, weight, n_vert)) {
+                /* move destination pointer */
+                vert_dest = vert_dest->next_vert;
+                continue;
+            }
+
+            struct edge *new_edge = init_edge(weight, vert_source, vert_dest);
         
             /* failed initialization, clean up */
             if (!new_edge) {
@@ -83,6 +93,7 @@ struct graph *generate(int type, long n_vert) {
             }
             /* move destination pointer */
             vert_dest = vert_dest->next_vert;
+            n_edges++;
         }
         
         /* move source pointer */
@@ -101,11 +112,31 @@ struct graph *generate(int type, long n_vert) {
 
     /* set fields */
     new_graph->n_vert = n_vert;
-    new_graph->n_edges = n_vert*(n_vert-1)/2;
+    new_graph->n_edges = n_edges;
     new_graph->vert_head = vert_head;
     new_graph->edge_head = edge_head;
+    new_graph->tree_head = NULL;
     
     return new_graph;
+}
+
+/* generate a weight for an edge */
+static double new_weight(int type, struct vertex *source, struct vertex *dest) {
+    switch(type) {
+        case RAND_WEIGHT:
+            return ((double) rand()/(double) RAND_MAX);
+        case RAND_COORD2:
+            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2);
+        case RAND_COORD3:
+            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
+                + pow(source->z - dest->z, 2);
+        case RAND_COORD4:
+            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
+                + pow(source->z - dest->z, 2) + pow(source->a - dest->a, 2);
+        default:
+            /* failure, return garbage */
+            return -1;
+    }
 }
 
 /* initialize a vertex */
@@ -155,7 +186,8 @@ static struct vertex *init_vert(int type, struct vertex *next_v) {
 }
 
 /* initialize an edge */
-static struct edge *init_edge(struct vertex *source, struct vertex *dest) {
+static struct edge *init_edge(double weight, struct vertex *source, 
+        struct vertex *dest) {
     assert(source->type == dest->type);
 
     /* allocate space for the edge */
@@ -169,32 +201,8 @@ static struct edge *init_edge(struct vertex *source, struct vertex *dest) {
     new_edge->next_edge = NULL;
     new_edge->source = source;
     new_edge->dest = dest;
-
-    /* set weight */
-    switch(new_edge->type) {
-        case RAND_WEIGHT:
-            new_edge->weight = ((double) rand()/(double) RAND_MAX);
-            return new_edge;
-        case RAND_COORD2:
-            new_edge->weight = pow(source->x - dest->x, 2) 
-                + pow(source->y - dest->y, 2);
-            return new_edge;
-        case RAND_COORD3:
-            new_edge->weight = pow(source->x - dest->x, 2) 
-                + pow(source->y - dest->y, 2)
-                + pow(source->z - dest->z, 2);
-            return new_edge;
-        case RAND_COORD4:
-            new_edge->weight = pow(source->x - dest->x, 2) 
-                + pow(source->y - dest->y, 2)
-                + pow(source->z - dest->z, 2)
-                + pow(source->a - dest->a, 2);
-            return new_edge;
-        default:
-            /* failure, free the edge and get out */
-            free(new_edge);
-            return NULL;
-    }
+    new_edge->weight = weight;
+    return new_edge;
 }
 
 /* free memory for a vertex linked list */
@@ -222,6 +230,7 @@ static void free_edge_list(struct edge *head) {
 void free_graph(struct graph *graph) {
     free_vertex_list(graph->vert_head);
     free_edge_list(graph->edge_head);
+    free_tree_list(graph->tree_head);
     free(graph);
 }
 

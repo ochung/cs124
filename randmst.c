@@ -25,6 +25,7 @@ int main(int argc, char *argv[] ) {
         printf("Not enough arguments, try again\n");
         return 1;
     }
+    int prune = atoi(argv[1]);
     int numpoints = atoi(argv[2]);
     if (numpoints < 8) {
         printf("Not enough points, try again\n");
@@ -56,50 +57,30 @@ int main(int argc, char *argv[] ) {
     struct graph *g;
     for (int t = 0; t < numtrials; t++) {
         /* timing */
-        //printf("TRIAL %d:\n", t + 1);
+        printf("TRIAL %d:\n", t + 1);
         gettimeofday(&tval_before, NULL);
         
-        g = generate(type, numpoints);
-        //printf("successfully generated graph\n");
+        g = generate(type, numpoints, prune);
+        printf("successfully generated graph\n");
         
         weight = mst_weight(g);
-        //printf("weight of MST: %f\n", weight);
+        printf("weight of MST: %f\n", weight);
         average_weight += weight;
         
         gettimeofday(&tval_after, NULL);
         timersub(&tval_after, &tval_before, &tval_result);
 
-        /*
         printf("time elapsed: %ld.%06ld\n", (long int)tval_result.tv_sec, 
             (long int)tval_result.tv_usec);
-        */
 
-        //printf("\n");
+        printf("\n");
+
         free_graph(g);
     }
     average_weight /= (double) numtrials;
 
     printf("%f %d %d %d\n", average_weight, numpoints, numtrials, dimension);
+    //threshold_test(RAND_COORD4, 1000, 5);
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

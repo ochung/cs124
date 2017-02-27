@@ -10,52 +10,39 @@ static struct vertex *find_set(struct vertex *v);
 static void path_compress_set(struct vertex *v, struct vertex *root);
 static void union_set(struct vertex *v1, struct vertex *v2);
 struct tree_edge *init_tree_edge(struct edge *e);
-static void free_tree_list(struct tree_edge *head);
+void free_tree_list(struct tree_edge *head);
 
 double mst_weight(struct graph *g) {
     g->edge_head = sort_by_weight(g->edge_head, g->n_edges);
-    //printf("sorted edges by weight\n");
 
     struct edge *cur_edge = g->edge_head;
     struct tree_edge *tree_head = NULL;
     struct tree_edge *cur_tree_edge;
     for (long i = 0; i < g->n_edges; i++) {
-        ////printf("iteration\n");
         if (find_set(cur_edge->source) != find_set(cur_edge->dest)) {
             union_set(cur_edge->source, cur_edge->dest);
-            ////printf("did a union\n");
 
             if (!tree_head) {
-                //printf("don't have a tree head\n");
                 tree_head = init_tree_edge(cur_edge);
                 cur_tree_edge = tree_head;
             } else {
-                //printf("do have a tree head\n");
                 cur_tree_edge->next_edge = init_tree_edge(cur_edge);
                 cur_tree_edge = cur_tree_edge->next_edge;
             }
         }
-        //printf("current %p, next edge is %p\n", cur_edge, cur_edge->next_edge);
         cur_edge = cur_edge->next_edge;
-        //printf("before check %p\n", cur_edge);
         if (!cur_edge) break;
-        //printf("assigned edge\n");
     }
-    //printf("outside of loop\n");
+
+    g->tree_head = tree_head;
 
     double total_weight = 0;
     cur_tree_edge = tree_head;
-    //printf("set cur_tree to %p\n", tree_head);
     while (cur_tree_edge) {
-        //printf("checking weight of %p edge %p\n", cur_tree_edge, cur_tree_edge->edge);
         total_weight += get_weight(cur_tree_edge->edge);        
-        //printf("set new cur_tree_edge %p, next %p\n", cur_tree_edge, cur_tree_edge->next_edge);
         cur_tree_edge = cur_tree_edge->next_edge;
     }
-    //printf("about to free %p\n", tree_head);
     
-    free_tree_list(tree_head);
-
     return total_weight;
 }
 
@@ -187,7 +174,7 @@ struct tree_edge *init_tree_edge(struct edge *e) {
     return t;
 }
 
-static void free_tree_list(struct tree_edge *head) {
+void free_tree_list(struct tree_edge *head) {
     struct tree_edge *cur_edge = head;
     struct tree_edge *next_edge;
     while (cur_edge) {

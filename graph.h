@@ -9,6 +9,12 @@
 #define RAND_COORD2 1
 #define RAND_COORD3 2
 #define RAND_COORD4 3
+#define THRESHOLD 0.00000000001
+#define PRUNE_THRESH_0 10
+#define PRUNE_THRESH_2 10
+#define PRUNE_THRESH_3 25
+#define PRUNE_THRESH_4 25
+#define PRUNE_OFF_4 .05
 
 /* vertex struct */
 struct vertex {
@@ -29,10 +35,10 @@ struct vertex {
     struct vertex *next_vert;
 
     /* coordinates for parts 2 and 3 */
-    int x; 
-    int y;
-    int z;
-    int a;
+    double x; 
+    double y;
+    double z;
+    double a;
 };
 
 /* edge struct */
@@ -58,11 +64,15 @@ struct graph {
     /* point to our edge list */
     struct vertex *vert_head;
     struct edge *edge_head;
+    
+    /* point to the tree solution */
+    struct tree_edge *tree_head;
 };
 
 /* generate a graph */
-struct graph *generate(int type, long n);
+struct graph *generate(int type, long n, int prune);
 void free_graph(struct graph *g);
+void free_tree_list(struct tree_edge *head);
 struct edge *testedges(int num);
 
 /* find the weight of the minimum spanning tree on a graph */
@@ -76,5 +86,10 @@ void set_find(struct vertex *v);
 struct edge *sort_by_weight(struct edge *head, int num);
 double get_weight(struct edge *e);
 void print_edges(struct edge* head);
+
+/* pruning */
+double graph_threshold(struct tree_edge *head, int g_edges, int resolution);
+void threshold_test(int type, int resolution, int repetitions);
+int prune_weight(int type, double weight, long n_vert);
 
 #endif
