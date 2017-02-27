@@ -19,8 +19,8 @@ double mst_weight(struct graph *g, int verbose) {
     struct tree_edge *tree_head = NULL;
     struct tree_edge *cur_tree_edge;
     for (long i = 0; i < g->n_edges; i++) {
-        if (i % (g->n_edges / 50) == 0 && verbose)
-            fprintf(stderr, "+");
+        if (i % (long) (g->n_edges / 10) == 0 && verbose)
+            fprintf(stderr, "-");
 
         if (find_set(cur_edge->source) != find_set(cur_edge->dest)) {
             union_set(cur_edge->source, cur_edge->dest);
@@ -33,6 +33,7 @@ double mst_weight(struct graph *g, int verbose) {
                 cur_tree_edge = cur_tree_edge->next_edge;
             }
         }
+
         cur_edge = cur_edge->next_edge;
 
         if (!cur_edge) break;
@@ -49,7 +50,7 @@ double mst_weight(struct graph *g, int verbose) {
         total_weight += get_weight(cur_tree_edge->edge);        
         cur_tree_edge = cur_tree_edge->next_edge;
     }
-    
+
     return total_weight;
 }
 

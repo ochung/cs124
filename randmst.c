@@ -6,7 +6,10 @@
 #include <time.h>
 #include "graph.h"
 
-// num == -1 means print all
+/* 
+ * printer for testing. 
+ * num == -1 means print all 
+ */
 void print_edges(struct edge* head) {
     struct edge *cur = head;
 
@@ -29,23 +32,6 @@ int main(int argc, char *argv[] ) {
     }
     int prune, verbose;
     int flag = atoi(argv[1]);
-    if (flag == 0) {
-        prune = 1;
-        verbose = 0;
-    }
-    else if (flag == 1) {
-        prune = 1;
-        verbose = 1;
-    }
-    else if (flag == 2) {
-        prune = 0;
-        verbose = 1;
-    }
-    int numpoints = atoi(argv[2]);
-    if (numpoints < 8) {
-        printf("Not enough points, try again\n");
-        return 1;
-    }
     int numtrials = atoi(argv[3]);
     int dimension = atoi(argv[4]);
     int type;
@@ -67,6 +53,28 @@ int main(int argc, char *argv[] ) {
             return 1;
     }
 
+    if (flag == 0) {
+        prune = 1;
+        verbose = 0;
+    }
+    else if (flag == 1) {
+        prune = 1;
+        verbose = 1;
+    }
+    else if (flag == 2) {
+        prune = 0;
+        verbose = 1;
+    }
+    else if (flag == 3) {
+        verbose = 0;
+        threshold_test(type, 10000, numtrials, verbose);
+        return 0;
+    }
+    int numpoints = atoi(argv[2]);
+    if (numpoints < 8) {
+        printf("Not enough points, try again\n");
+        return 1;
+    }
     double weight, average_weight;
     struct timeval tval_before, tval_after, tval_result;
     struct graph *g;

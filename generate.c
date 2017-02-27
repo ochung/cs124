@@ -34,43 +34,49 @@ struct graph *generate(int type, long n_vert, int prune) {
     struct timeval tval;
     gettimeofday(&tval, NULL);
     srand((unsigned int) tval.tv_usec);
+
     /* create linked list of n_vert vertices */
     struct vertex *vert_head, *cur_vertex; 
     vert_head = cur_vertex = NULL; 
     
+    /* set up the linked list of vertex block allocations */
     long vert_structs_allocated = 0;
     struct vertex *vptr;
     struct valloc *valloc_head = NULL;
     struct valloc *cur_valloc;
-    assert(vert_structs_allocated == 0);
-    /* make n vertices */
+
+    /* make n_vert vertices */
     for (long i = 0; i < n_vert; i++) {
+        /* if we're due for another block allocation, do that */
         if (vert_structs_allocated == 0) {
+            /* allocate a block */
             vptr = (struct vertex *) malloc(MEM_BLOCK*sizeof(struct vertex));
-            (void) (!valloc_head);            
+
+            /* if the vertex allocation list doesn't have a head, make one */
             if (!valloc_head) {
                 valloc_head = (struct valloc *) malloc(sizeof(struct valloc));
                 cur_valloc = valloc_head;
-                valloc_head->next_alloc = NULL;
+            /* otherwise, put our allocation at the end of the list */
             } else {
-                cur_valloc->next_alloc = (struct valloc *) malloc(sizeof(struct valloc));
+                cur_valloc->next_alloc = (struct valloc *) 
+                    malloc(sizeof(struct valloc));
                 cur_valloc = cur_valloc->next_alloc;
-                cur_valloc->next_alloc = NULL;
             }
+            cur_valloc->next_alloc = NULL;
             cur_valloc->ptr = vptr;
         }
 
 
-        /* initialize a vertex */
+        /* initialize a vertex with the preallocated memory */
         struct vertex *v = init_vert(vptr + vert_structs_allocated, type, NULL);
         
         /* failed initialization, clean up */
         if (!v) {
-            free_vertex_list(vert_head);
+            free_vallocation_list(valloc_head);
             return NULL;
         }
 
-        /* if we don't have a head, make this one the head */
+        /* if we don't have a head for the vertex list, make this one the head */
         if (vert_head == NULL) {
             vert_head = v; 
             cur_vertex = vert_head;
@@ -92,12 +98,16 @@ struct graph *generate(int type, long n_vert, int prune) {
     struct edge *edge_head, *cur_edge; 
     edge_head = cur_edge = NULL;
     
+    /* count the edges we add to the graph */ 
+    long n_edges = 0;
+
+    /* set up edge allocation linked list */
     long structs_allocated = 0;
     struct alloc *alloc_head = NULL;
     struct alloc *cur_alloc = NULL;
     struct edge *ptr = NULL;
-    long n_edges = 0;
     double weight;
+
     /* iterate over source nodes */
     while (vert_source->next_vert != NULL) {
         /* start right after the source vertex */
@@ -177,8 +187,8 @@ struct graph *generate(int type, long n_vert, int prune) {
     new_graph->alloc_head = alloc_head;
     new_graph->valloc_head = valloc_head;
     
-    printf("generated graph with %ld edges, %ld max\n", 
-        n_edges, n_vert*(n_vert-1)/2);
+    //printf("generated graph with %ld edges, %ld max\n", 
+    //    n_edges, n_vert*(n_vert-1)/2);
     return new_graph;
 }
 

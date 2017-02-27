@@ -101,7 +101,7 @@ void print_edges(struct edge* head);
 
 /* pruning */
 double graph_threshold(struct tree_edge *head, int g_edges, int resolution);
-void threshold_test(int type, int resolution, int repetitions);
+void threshold_test(int type, int resolution, int repetitions, int verbose);
 int prune_weight(int type, double weight, long n_vert);
 
 #endif
