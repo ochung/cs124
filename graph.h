@@ -13,14 +13,15 @@
 #define RAND_COORD4 4
 
 #define THRESHOLD 10e-9
-#define PRUNE_THRESH_0 10
-#define PRUNE_OFF_0 0
-#define PRUNE_THRESH_2 10
-#define PRUNE_OFF_2 0
-#define PRUNE_THRESH_3 25
-#define PRUNE_OFF_3 0 
-#define PRUNE_THRESH_4 50
-#define PRUNE_OFF_4 .05
+#define PRUNE_CONST_0 2.1625
+#define PRUNE_EXP_0 -0.818
+#define PRUNE_CONST_2 1.3899
+#define PRUNE_EXP_2 -.463
+#define PRUNE_CONST_3 1.1388
+#define PRUNE_EXP_3 -.296
+#define PRUNE_CONST_4 1.1581
+#define PRUNE_EXP_4 -.223
+#define PRUNE_OFF .03
 
 #define MEM_BLOCK 1024 
 

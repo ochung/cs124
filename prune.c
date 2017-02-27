@@ -1,26 +1,29 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <assert.h>
 #include "graph.h"
 
 int prune_weight(int type, double weight, long n_vert) {
     switch(type) {
         case RAND_WEIGHT:
-            //if (weight > ((double) PRUNE_THRESH_0)/ ((double) n_vert))
-            if (weight > .3)
+            if (weight > (((double) PRUNE_CONST_0) * 
+                    pow((double) n_vert, PRUNE_EXP_0)) + PRUNE_OFF)
                 return 1;
             break;
         case RAND_COORD2:
-            if (weight > ((double) PRUNE_THRESH_2)/ ((double) n_vert))
+            if (weight > (((double) PRUNE_CONST_2) * 
+                    pow((double) n_vert, PRUNE_EXP_2)) + PRUNE_OFF)
                 return 1;
             break;
         case RAND_COORD3:
-            if (weight > ((double) PRUNE_THRESH_3)/ ((double) n_vert))
+            if (weight > (((double) PRUNE_CONST_3) * 
+                    pow((double) n_vert, PRUNE_EXP_3)) + PRUNE_OFF)
                 return 1;
             break;
         case RAND_COORD4:
-            if (weight > ((double) PRUNE_THRESH_4)/ ((double) n_vert) + 
-                    (double) PRUNE_OFF_4)
+            if (weight > (((double) PRUNE_CONST_4) * 
+                    pow((double) n_vert, PRUNE_EXP_4)) + PRUNE_OFF)
                 return 1;
             break;
         default:
@@ -71,7 +74,7 @@ double graph_threshold(struct tree_edge *head, int g_edges, int resolution) {
 void threshold_test(int type, int resolution, int repetitions, int verbose) {
     double thresh;
     struct graph *g; 
-    for (int i = 10; i < 1000; i += 10) {
+    for (int i = 10; i <= 1500; i += 10) {
         thresh = 0;
         for (int j = 0; j < repetitions; j++) {
             /* generate a graph */
