@@ -79,13 +79,16 @@ int main(int argc, char *argv[] ) {
     struct timeval tval_before, tval_after, tval_result;
     struct graph *g;
     for (int t = 0; t < numtrials; t++) {
-        /* timing */
         if (verbose) printf("TRIAL %d:\n", t + 1);
+
+        /* timing */
         gettimeofday(&tval_before, NULL);
         
+        /* generate a graph */
         g = generate(type, numpoints, prune);
         if (verbose) printf("successfully generated graph\n");
         
+        /* find the MST and return its weight */
         weight = mst_weight(g, verbose);
         if (verbose) printf("weight of MST: %f\n", weight);
         average_weight += weight;

@@ -45,12 +45,15 @@ double mst_weight(struct graph *g, int verbose) {
     g->tree_head = tree_head;
 
     double total_weight = 0;
+    int tree_num = 0;
     cur_tree_edge = tree_head;
     while (cur_tree_edge) {
         total_weight += get_weight(cur_tree_edge->edge);        
         cur_tree_edge = cur_tree_edge->next_edge;
+        tree_num++;
     }
-
+    if (verbose) printf("%d edges in the MST\n", tree_num);
+    
     return total_weight;
 }
 
