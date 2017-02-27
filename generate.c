@@ -6,12 +6,27 @@
 #include <math.h>
 #include "graph.h"
 
-static struct vertex *init_vert(int type, struct vertex *next_v);
-static struct edge *init_edge(double weight, struct vertex *source, struct vertex *dest);
+struct valloc {
+    struct valloc *next_alloc;
+    struct vertex *ptr;
+};
+
+struct alloc {
+    struct alloc *next_alloc;
+    struct edge *ptr;
+};
+
+static struct vertex *init_vert(struct vertex *ptr, int type, struct vertex *next_v);
+static struct edge *init_edge(struct edge *ptr, double weight, struct vertex *source, 
+    struct vertex *dest);
 static double new_weight(int type, struct vertex *source, struct vertex *dest);
 static void free_vertex_list(struct vertex *head);
 static void free_edge_list(struct edge *head);
+static void free_allocation_list(struct alloc *head);
+static void free_vallocation_list(struct valloc *head);
 void free_graph(struct graph *g);
+
+
 
 /* generate a random graph of a given type with n nodes */
 struct graph *generate(int type, long n_vert, int prune) {
@@ -24,10 +39,29 @@ struct graph *generate(int type, long n_vert, int prune) {
     struct vertex *vert_head, *cur_vertex; 
     vert_head = cur_vertex = NULL; 
     
+    long vert_structs_allocated = 0;
+    struct vertex *vptr;
+    struct valloc *valloc_head;
+    struct valloc *cur_valloc;
     /* make n vertices */
     for (long i = 0; i < n_vert; i++) {
+        if (vert_structs_allocated == 0) {
+            vptr = (struct vertex *) malloc(MEM_BLOCK*sizeof(struct vertex));
+            if (!valloc_head) {
+                valloc_head = (struct valloc *) malloc(sizeof(struct valloc));
+                cur_valloc = valloc_head;
+                valloc_head->next_alloc = NULL;
+            } else {
+                cur_valloc->next_alloc = (struct valloc *) malloc(sizeof(struct valloc));
+                cur_valloc = cur_valloc->next_alloc;
+                cur_valloc->next_alloc = NULL;
+            }
+            cur_valloc->ptr = vptr;
+        }
+
+
         /* initialize a vertex */
-        struct vertex *v = init_vert(type, NULL);
+        struct vertex *v = init_vert(vptr + vert_structs_allocated, type, NULL);
         
         /* failed initialization, clean up */
         if (!v) {
@@ -46,6 +80,7 @@ struct graph *generate(int type, long n_vert, int prune) {
             cur_vertex->next_vert = v;
             cur_vertex = v;
         }
+        vert_structs_allocated = (vert_structs_allocated + 1) % MEM_BLOCK;
     }
     
     /* pointers for traversing vertex linked list */
@@ -56,6 +91,10 @@ struct graph *generate(int type, long n_vert, int prune) {
     struct edge *edge_head, *cur_edge; 
     edge_head = cur_edge = NULL;
     
+    long structs_allocated = 0;
+    struct alloc *alloc_head = NULL;
+    struct alloc *cur_alloc = NULL;
+    struct edge *ptr = NULL;
     long n_edges = 0;
     double weight;
     /* iterate over source nodes */
@@ -71,13 +110,28 @@ struct graph *generate(int type, long n_vert, int prune) {
                 vert_dest = vert_dest->next_vert;
                 continue;
             }
-
-            struct edge *new_edge = init_edge(weight, vert_source, vert_dest);
+            
+            if (structs_allocated == 0) {
+                ptr = (struct edge *) malloc(MEM_BLOCK*sizeof(struct edge));
+                if (!alloc_head) {
+                    alloc_head = (struct alloc *) malloc(sizeof(struct alloc));
+                    cur_alloc = alloc_head;
+                    alloc_head->next_alloc = NULL;
+                } else {
+                    cur_alloc->next_alloc = (struct alloc *) malloc(sizeof(struct alloc));
+                    cur_alloc = cur_alloc->next_alloc;
+                    cur_alloc->next_alloc = NULL;
+                }
+                cur_alloc->ptr = ptr;
+            }
+            struct edge *new_edge = init_edge(cur_alloc->ptr + structs_allocated, 
+                weight, vert_source, vert_dest);
         
             /* failed initialization, clean up */
             if (!new_edge) {
                 free_vertex_list(vert_head);
-                free_edge_list(edge_head);
+                //free_edge_list(edge_head);
+                free_allocation_list(alloc_head);
                 return NULL;
             }
 
@@ -91,9 +145,11 @@ struct graph *generate(int type, long n_vert, int prune) {
                 cur_edge->next_edge = new_edge;
                 cur_edge = new_edge;
             }
+
             /* move destination pointer */
             vert_dest = vert_dest->next_vert;
             n_edges++;
+            structs_allocated = (structs_allocated + 1) % MEM_BLOCK;
         }
         
         /* move source pointer */
@@ -106,7 +162,8 @@ struct graph *generate(int type, long n_vert, int prune) {
     /* failed allocation, clean up */
     if (!new_graph) {
         free_vertex_list(vert_head);
-        free_edge_list(edge_head);
+        //free_edge_list(edge_head);
+        free_allocation_list(alloc_head);
         return NULL;
     }
 
@@ -116,7 +173,11 @@ struct graph *generate(int type, long n_vert, int prune) {
     new_graph->vert_head = vert_head;
     new_graph->edge_head = edge_head;
     new_graph->tree_head = NULL;
+    new_graph->alloc_head = alloc_head;
+    new_graph->valloc_head = valloc_head;
     
+    printf("generated graph with %ld edges, %ld max\n", 
+        n_edges, n_vert*(n_vert-1)/2);
     return new_graph;
 }
 
@@ -140,9 +201,14 @@ static double new_weight(int type, struct vertex *source, struct vertex *dest) {
 }
 
 /* initialize a vertex */
-static struct vertex *init_vert(int type, struct vertex *next_v) {
+static struct vertex *init_vert(struct vertex *ptr, int type, struct vertex *next_v) {
     /* allocate space for the vertex */
-    struct vertex *v = (struct vertex *) malloc(sizeof(struct vertex));
+    struct vertex *v;
+    if (!ptr) 
+        v = (struct vertex *) malloc(sizeof(struct vertex));
+    else
+        v = ptr;
+
 
     /* failed allocation */
     if (v == NULL) return NULL;
@@ -186,12 +252,16 @@ static struct vertex *init_vert(int type, struct vertex *next_v) {
 }
 
 /* initialize an edge */
-static struct edge *init_edge(double weight, struct vertex *source, 
+static struct edge *init_edge(struct edge *ptr, double weight, struct vertex *source, 
         struct vertex *dest) {
     assert(source->type == dest->type);
 
     /* allocate space for the edge */
-    struct edge *new_edge = (struct edge *) malloc(sizeof(struct edge));
+    struct edge *new_edge;
+    if (!ptr) 
+        new_edge = (struct edge *) malloc(sizeof(struct edge));
+    else
+        new_edge = ptr;
 
     /* failed allocation */
     if (!new_edge) return NULL;
@@ -227,10 +297,34 @@ static void free_edge_list(struct edge *head) {
     }
 }
 
+static void free_allocation_list(struct alloc *head) {
+    struct alloc* cur_alloc = head;
+    struct alloc* next_alloc = cur_alloc;
+    while (cur_alloc) {
+        next_alloc = cur_alloc->next_alloc;        
+        free(cur_alloc);
+        cur_alloc = next_alloc;
+    }
+}
+
+static void free_vallocation_list(struct valloc *head) {
+    struct valloc* cur_valloc = head;
+    struct valloc* next_valloc = cur_valloc;
+    while (cur_valloc) {
+        next_valloc = cur_valloc->next_alloc;        
+        free(cur_valloc);
+        cur_valloc = next_valloc;
+    }
+}
+
+
 void free_graph(struct graph *graph) {
-    free_vertex_list(graph->vert_head);
-    free_edge_list(graph->edge_head);
+    //free_vertex_list(graph->vert_head);
+    //free_edge_list(graph->edge_head);
     free_tree_list(graph->tree_head);
+    printf("freed everything but allocations\n");
+    free_allocation_list(graph->alloc_head);
+    free_vallocation_list(graph->valloc_head);
     free(graph);
 }
 
@@ -250,3 +344,4 @@ struct edge *testedges(int num) {
     cur->type = RAND_WEIGHT;
     return head;
 }
+

@@ -14,7 +14,8 @@
 #define PRUNE_THRESH_2 10
 #define PRUNE_THRESH_3 25
 #define PRUNE_THRESH_4 25
-#define PRUNE_OFF_4 .05
+#define PRUNE_OFF_4 .02
+#define MEM_BLOCK 1024 
 
 /* vertex struct */
 struct vertex {
@@ -67,6 +68,10 @@ struct graph {
     
     /* point to the tree solution */
     struct tree_edge *tree_head;
+    
+    /* point to the allocation list */
+    struct alloc *alloc_head;
+    struct valloc *valloc_head;
 };
 
 /* generate a graph */
