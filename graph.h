@@ -5,6 +5,7 @@
 
 #ifndef _GRAPHDEF
 #define _GRAPHDEF 1
+#define _BSD_SOURCE
 
 #define RAND_WEIGHT 0
 #define RAND_COORD2 2

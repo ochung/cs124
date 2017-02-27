@@ -34,19 +34,20 @@ struct graph *generate(int type, long n_vert, int prune) {
     struct timeval tval;
     gettimeofday(&tval, NULL);
     srand((unsigned int) tval.tv_usec);
-   
     /* create linked list of n_vert vertices */
     struct vertex *vert_head, *cur_vertex; 
     vert_head = cur_vertex = NULL; 
     
     long vert_structs_allocated = 0;
     struct vertex *vptr;
-    struct valloc *valloc_head;
+    struct valloc *valloc_head = NULL;
     struct valloc *cur_valloc;
+    assert(vert_structs_allocated == 0);
     /* make n vertices */
     for (long i = 0; i < n_vert; i++) {
         if (vert_structs_allocated == 0) {
             vptr = (struct vertex *) malloc(MEM_BLOCK*sizeof(struct vertex));
+            (void) (!valloc_head);            
             if (!valloc_head) {
                 valloc_head = (struct valloc *) malloc(sizeof(struct valloc));
                 cur_valloc = valloc_head;
