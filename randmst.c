@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
+#include <time.h>
 #include "graph.h"
 
 // num == -1 means print all
