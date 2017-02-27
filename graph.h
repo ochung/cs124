@@ -19,7 +19,7 @@
 #define PRUNE_OFF_2 0
 #define PRUNE_THRESH_3 25
 #define PRUNE_OFF_3 0 
-#define PRUNE_THRESH_4 25
+#define PRUNE_THRESH_4 50
 #define PRUNE_OFF_4 .05
 
 #define MEM_BLOCK 1024 
