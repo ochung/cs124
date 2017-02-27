@@ -62,7 +62,7 @@ void threshold_test(int type, int resolution, int repetitions) {
         thresh = 0;
         for (int j = 0; j < repetitions; j++) {
             g = generate(type, i, 0);
-            mst_weight(g);
+            mst_weight(g, 1);
             thresh += graph_threshold(g->tree_head, g->n_edges, resolution);
             free_graph(g);
         }

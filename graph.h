@@ -5,16 +5,22 @@
 
 #ifndef _GRAPHDEF
 #define _GRAPHDEF 1
+
 #define RAND_WEIGHT 0
-#define RAND_COORD2 1
-#define RAND_COORD3 2
-#define RAND_COORD4 3
-#define THRESHOLD 0.00000000001
+#define RAND_COORD2 2
+#define RAND_COORD3 3
+#define RAND_COORD4 4
+
+#define THRESHOLD 10e-9
 #define PRUNE_THRESH_0 10
+#define PRUNE_OFF_0 0
 #define PRUNE_THRESH_2 10
+#define PRUNE_OFF_2 0
 #define PRUNE_THRESH_3 25
+#define PRUNE_OFF_3 0 
 #define PRUNE_THRESH_4 25
-#define PRUNE_OFF_4 .02
+#define PRUNE_OFF_4 .05
+
 #define MEM_BLOCK 1024 
 
 /* vertex struct */
@@ -81,7 +87,7 @@ void free_tree_list(struct tree_edge *head);
 struct edge *testedges(int num);
 
 /* find the weight of the minimum spanning tree on a graph */
-double mst_weight(struct graph *g);
+double mst_weight(struct graph *g, int verbose);
 
 /* set operations for kruskal's algorithm */
 void set_union(struct vertex *v1, struct vertex *v2);

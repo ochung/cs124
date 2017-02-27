@@ -187,13 +187,13 @@ static double new_weight(int type, struct vertex *source, struct vertex *dest) {
         case RAND_WEIGHT:
             return ((double) rand()/(double) RAND_MAX);
         case RAND_COORD2:
-            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2);
+            return sqrt(pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2));
         case RAND_COORD3:
-            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
-                + pow(source->z - dest->z, 2);
+            return sqrt(pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
+                + pow(source->z - dest->z, 2));
         case RAND_COORD4:
-            return pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
-                + pow(source->z - dest->z, 2) + pow(source->a - dest->a, 2);
+            return sqrt(pow(source->x - dest->x, 2) + pow(source->y - dest->y, 2)
+                + pow(source->z - dest->z, 2) + pow(source->a - dest->a, 2));
         default:
             /* failure, return garbage */
             return -1;
@@ -319,10 +319,7 @@ static void free_vallocation_list(struct valloc *head) {
 
 
 void free_graph(struct graph *graph) {
-    //free_vertex_list(graph->vert_head);
-    //free_edge_list(graph->edge_head);
     free_tree_list(graph->tree_head);
-    printf("freed everything but allocations\n");
     free_allocation_list(graph->alloc_head);
     free_vallocation_list(graph->valloc_head);
     free(graph);
